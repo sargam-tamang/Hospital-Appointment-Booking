@@ -1,9 +1,25 @@
 const express = require("express");
-
+const fs = require("fs");
+const YAML = require("yaml");
+const swaggerUi = require("swagger-ui-express");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+
+const openapiFile = fs.readFileSync(
+  './docs/openapi.yaml',
+  'utf8'
+);
+
+const swaggerDocument = YAML.parse(openapiFile);
+
+// Swagger UI
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocument)
+);
 
 const doctors = [
   { id: 1, name: "Dr. Sarah Chen", specialty: "Cardiology" },

@@ -1,0 +1,94 @@
+
+openapi: 3.0.3
+
+info:
+  title: My REST API
+  description: API documentation using OpenAPI
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local development
+
+tags:
+  - name: Users
+    description: User management APIs
+
+paths:
+  /api/users:
+    get:
+      summary: Get all users
+      tags:
+        - Users
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+    post:
+      summary: Create a user
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+      responses:
+        '201':
+          description: User created successfully
+
+  /api/users/{id}:
+    get:
+      summary: Get user by ID
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: John
+        email:
+          type: string
+          example: john@example.com
+
+    CreateUser:
+      type: object
+      required:
+        - name
+        - email
+      properties:
+        name:
+          type: string
+          example: John
+        email:
+          type: string
+          example: john@example.com
