@@ -1,6 +1,7 @@
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
-module.exports = {
+export default {
   development: {
     client: "pg",
     connection: process.env.DATABASE_URL,
@@ -8,6 +9,9 @@ module.exports = {
     migrations: {
       directory: "./db/migrations",
       tableName: "knex_migrations",
+    },
+    seeds: {
+      directory: "./db/seeds",
     },
   },
 };
