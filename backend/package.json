@@ -7,9 +7,12 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
+    "dev2": "nodemon src/server.js",
     "build": "npm install"
   },
   "dependencies": {
+    "swagger-ui-express": "^5.0.1",
+    "yaml": "^2.9.1",
     "@faker-js/faker": "^10.6.0",
     "bcryptjs": "^3.0.3",
     "dotenv": "^18.0.9",

@@ -1,0 +1,1783 @@
+
+openapi: 3.1.0
+
+info:
+  title: Doctor Appointment Booking API
+  version: 1.0.0
+  description: |
+    REST API for a doctor appointment booking system.
+    This API supports patient-facing functionality including
+    hospital discovery, doctor discovery, appointment booking,
+    appointment management, and user profiles.
+
+servers:
+  - url: http://localhost:3000/
+    description: Local development server
+
+tags:
+  - name: Hospitals
+    description: Browse hospitals and discover hospitals by location.
+  - name: Doctors
+    description: Browse doctors, specializations, and availability.
+  - name: Appointments
+    description: Book, view, cancel, and reschedule appointments.
+  - name: Users
+    description: Retrieve and update user profiles.
+  - name: Specializations
+    description: Browse available medical specializations.
+  - name: Discovery
+    description: Search across doctors and hospitals and browse cities.
+
+paths:
+
+  # ==================================================
+  # HOSPITALS
+  # ==================================================
+
+  # /hospitals:
+  #   get:
+  #     tags:
+  #       - Hospitals
+  #     summary: Get all hospitals
+  #     operationId: getHospitals
+  #     parameters:
+  #       - $ref: '#/components/parameters/Page'
+  #       - $ref: '#/components/parameters/Limit'
+  #       - name: city
+  #         in: query
+  #         schema:
+  #           type: string
+  #         description: Filter hospitals by city.
+  #       - name: sort
+  #         in: query
+  #         schema:
+  #           type: string
+  #           enum: [popularity, name]
+  #           default: popularity
+  #     responses:
+  #       '200':
+  #         description: Hospitals retrieved successfully
+  #         content:
+  #           application/json:
+  #             schema:
+  #               allOf:
+  #                 - $ref: '#/components/schemas/SuccessResponse'
+  #                 - type: object
+  #                   properties:
+  #                     data:
+  #                       type: object
+  #                       properties:
+  #                         hospitals:
+  #                           type: array
+  #                           items:
+  #                             $ref: '#/components/schemas/Hospital'
+  #                         pagination:
+  #                           $ref: '#/components/schemas/Pagination'
+  #       '500':
+  #         $ref: '#/components/responses/InternalServerError'
+
+  # /hospitals/popular:
+  #   get:
+  #     tags:
+  #       - Hospitals
+  #     summary: Get popular hospitals
+  #     operationId: getPopularHospitals
+  #     parameters:
+  #       - name: limit
+  #         in: query
+  #         schema:
+  #           type: integer
+  #           default: 10
+  #           minimum: 1
+  #           maximum: 100
+  #     responses:
+  #       '200':
+  #         description: Popular hospitals retrieved successfully
+  #         content:
+  #           application/json:
+  #             schema:
+  #               allOf:
+  #                 - $ref: '#/components/schemas/SuccessResponse'
+  #                 - type: object
+  #                   properties:
+  #                     data:
+  #                       type: object
+  #                       properties:
+  #                         hospitals:
+  #                           type: array
+  #                           items:
+  #                             $ref: '#/components/schemas/Hospital'
+  #       '500':
+  #         $ref: '#/components/responses/InternalServerError'
+
+  # /hospitals/nearby:
+  #   get:
+  #     tags:
+  #       - Hospitals
+  #     summary: Find nearby hospitals
+  #     operationId: getNearbyHospitals
+  #     parameters:
+  #       - name: lat
+  #         in: query
+  #         required: true
+  #         schema:
+  #           type: number
+  #           minimum: -90
+  #           maximum: 90
+  #         description: User latitude.
+  #       - name: lng
+  #         in: query
+  #         required: true
+  #         schema:
+  #           type: number
+  #           minimum: -180
+  #           maximum: 180
+  #         description: User longitude.
+  #       - name: radius
+  #         in: query
+  #         schema:
+  #           type: number
+  #           default: 10
+  #           minimum: 1
+  #         description: Search radius in kilometers.
+  #       - $ref: '#/components/parameters/Page'
+  #       - $ref: '#/components/parameters/Limit'
+  #     responses:
+  #       '200':
+  #         description: Nearby hospitals retrieved successfully
+  #         content:
+  #           application/json:
+  #             schema:
+  #               allOf:
+  #                 - $ref: '#/components/schemas/SuccessResponse'
+  #                 - type: object
+  #                   properties:
+  #                     data:
+  #                       type: object
+  #                       properties:
+  #                         hospitals:
+  #                           type: array
+  #                           items:
+  #                             $ref: '#/components/schemas/NearbyHospital'
+  #                         pagination:
+  #                           $ref: '#/components/schemas/Pagination'
+  #       '400':
+  #         $ref: '#/components/responses/BadRequest'
+  #       '500':
+  #         $ref: '#/components/responses/InternalServerError'
+
+  # /hospitals/{hospital_id}:
+  #   get:
+  #     tags:
+  #       - Hospitals
+  #     summary: Get hospital details
+  #     operationId: getHospitalById
+  #     parameters:
+  #       - $ref: '#/components/parameters/HospitalId'
+  #     responses:
+  #       '200':
+  #         description: Hospital retrieved successfully
+  #         content:
+  #           application/json:
+  #             schema:
+  #               allOf:
+  #                 - $ref: '#/components/schemas/SuccessResponse'
+  #                 - type: object
+  #                   properties:
+  #                     data:
+  #                       $ref: '#/components/schemas/HospitalDetails'
+  #       '404':
+  #         $ref: '#/components/responses/NotFound'
+  #       '500':
+  #         $ref: '#/components/responses/InternalServerError'
+
+  # /hospitals/{hospital_id}/doctors:
+  #   get:
+  #     tags:
+  #       - Hospitals
+  #       - Doctors
+  #     summary: Get doctors belonging to a hospital
+  #     operationId: getHospitalDoctors
+  #     parameters:
+  #       - $ref: '#/components/parameters/HospitalId'
+  #       - $ref: '#/components/parameters/Page'
+  #       - $ref: '#/components/parameters/Limit'
+  #       - name: specialization
+  #         in: query
+  #         schema:
+  #           type: string
+  #     responses:
+  #       '200':
+  #         description: Hospital doctors retrieved successfully
+  #         content:
+  #           application/json:
+  #             schema:
+  #               allOf:
+  #                 - $ref: '#/components/schemas/SuccessResponse'
+  #                 - type: object
+  #                   properties:
+  #                     data:
+  #                       type: object
+  #                       properties:
+  #                         hospital:
+  #                           $ref: '#/components/schemas/Hospital'
+  #                         doctors:
+  #                           type: array
+  #                           items:
+  #                             $ref: '#/components/schemas/Doctor'
+  #                         pagination:
+  #                           $ref: '#/components/schemas/Pagination'
+  #       '404':
+  #         $ref: '#/components/responses/NotFound'
+  #       '500':
+  #         $ref: '#/components/responses/InternalServerError'
+
+  # ==================================================
+  # DOCTORS
+  # ==================================================
+
+  # /doctors:
+  #   get:
+  #     tags:
+  #       - Doctors
+  #     summary: Get all doctors
+  #     operationId: getDoctors
+  #     parameters:
+  #       - $ref: '#/components/parameters/Page'
+  #       - $ref: '#/components/parameters/Limit'
+  #       - name: hospital_id
+  #         in: query
+  #         schema:
+  #           type: integer
+  #       - name: specialization
+  #         in: query
+  #         schema:
+  #           type: string
+  #       - name: city
+  #         in: query
+  #         schema:
+  #           type: string
+  #       - name: search
+  #         in: query
+  #         schema:
+  #           type: string
+  #         description: Search by doctor's first or last name.
+  #       - name: sort
+  #         in: query
+  #         schema:
+  #           type: string
+  #           enum: [name]
+  #           default: name
+  #     responses:
+  #       '200':
+  #         description: Doctors retrieved successfully
+  #         content:
+  #           application/json:
+  #             schema:
+  #               allOf:
+  #                 - $ref: '#/components/schemas/SuccessResponse'
+  #                 - type: object
+  #                   properties:
+  #                     data:
+  #                       type: object
+  #                       properties:
+  #                         doctors:
+  #                           type: array
+  #                           items:
+  #                             $ref: '#/components/schemas/Doctor'
+  #                         pagination:
+  #                           $ref: '#/components/schemas/Pagination'
+  #       '500':
+  #         $ref: '#/components/responses/InternalServerError'
+
+  # /doctors/featured:
+  #   get:
+  #     tags:
+  #       - Doctors
+  #     summary: Get featured doctors
+  #     operationId: getFeaturedDoctors
+  #     parameters:
+  #       - name: limit
+  #         in: query
+  #         schema:
+  #           type: integer
+  #           default: 10
+  #           minimum: 1
+  #           maximum: 100
+  #     responses:
+  #       '200':
+  #         description: Featured doctors retrieved successfully
+  #         content:
+  #           application/json:
+  #             schema:
+  #               allOf:
+  #                 - $ref: '#/components/schemas/SuccessResponse'
+  #                 - type: object
+  #                   properties:
+  #                     data:
+  #                       type: object
+  #                       properties:
+  #                         doctors:
+  #                           type: array
+  #                           items:
+  #                             $ref: '#/components/schemas/Doctor'
+  #       '500':
+  #         $ref: '#/components/responses/InternalServerError'
+
+  # /doctors/nearby:
+  #   get:
+  #     tags:
+  #       - Doctors
+  #     summary: Find nearby doctors
+  #     operationId: getNearbyDoctors
+  #     parameters:
+  #       - name: lat
+  #         in: query
+  #         required: true
+  #         schema:
+  #           type: number
+  #           minimum: -90
+  #           maximum: 90
+  #       - name: lng
+  #         in: query
+  #         required: true
+  #         schema:
+  #           type: number
+  #           minimum: -180
+  #           maximum: 180
+  #       - name: radius
+  #         in: query
+  #         schema:
+  #           type: number
+  #           default: 10
+  #           minimum: 1
+  #         description: Search radius in kilometers.
+  #       - name: specialization
+  #         in: query
+  #         schema:
+  #           type: string
+  #       - $ref: '#/components/parameters/Page'
+  #       - $ref: '#/components/parameters/Limit'
+  #     responses:
+  #       '200':
+  #         description: Nearby doctors retrieved successfully
+  #         content:
+  #           application/json:
+  #             schema:
+  #               allOf:
+  #                 - $ref: '#/components/schemas/SuccessResponse'
+  #                 - type: object
+  #                   properties:
+  #                     data:
+  #                       type: object
+  #                       properties:
+  #                         doctors:
+  #                           type: array
+  #                           items:
+  #                             $ref: '#/components/schemas/NearbyDoctor'
+  #                         pagination:
+  #                           $ref: '#/components/schemas/Pagination'
+  #       '400':
+  #         $ref: '#/components/responses/BadRequest'
+  #       '500':
+  #         $ref: '#/components/responses/InternalServerError'
+
+  # /doctors/{doctor_id}:
+  #   get:
+  #     tags:
+  #       - Doctors
+  #     summary: Get doctor details
+  #     operationId: getDoctorById
+  #     parameters:
+  #       - $ref: '#/components/parameters/DoctorId'
+  #     responses:
+  #       '200':
+  #         description: Doctor retrieved successfully
+  #         content:
+  #           application/json:
+  #             schema:
+  #               allOf:
+  #                 - $ref: '#/components/schemas/SuccessResponse'
+  #                 - type: object
+  #                   properties:
+  #                     data:
+  #                       $ref: '#/components/schemas/DoctorDetails'
+  #       '404':
+  #         $ref: '#/components/responses/NotFound'
+  #       '500':
+  #         $ref: '#/components/responses/InternalServerError'
+
+  # /doctors/{doctor_id}/availability:
+  #   get:
+  #     tags:
+  #       - Doctors
+  #     summary: Get doctor's available dates and times
+  #     operationId: getDoctorAvailability
+  #     parameters:
+  #       - $ref: '#/components/parameters/DoctorId'
+  #       - name: from
+  #         in: query
+  #         required: true
+  #         schema:
+  #           type: string
+  #           format: date
+  #         description: Start date of availability search.
+  #       - name: to
+  #         in: query
+  #         required: true
+  #         schema:
+  #           type: string
+  #           format: date
+  #         description: End date of availability search.
+  #     responses:
+  #       '200':
+  #         description: Doctor availability retrieved successfully
+  #         content:
+  #           application/json:
+  #             schema:
+  #               allOf:
+  #                 - $ref: '#/components/schemas/SuccessResponse'
+  #                 - type: object
+  #                   properties:
+  #                     data:
+  #                       $ref: '#/components/schemas/AvailabilityResponse'
+  #       '400':
+  #         $ref: '#/components/responses/BadRequest'
+  #       '404':
+  #         $ref: '#/components/responses/NotFound'
+  #       '500':
+  #         $ref: '#/components/responses/InternalServerError'
+
+  /doctors:
+    get:
+      summary: Get all doctors
+      tags:
+        - Doctors
+
+      responses:
+        "200":
+          description: Doctors fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Doctors fetched successfully
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        first_name:
+                          type: string
+                          example: John
+                        last_name:
+                          type: string
+                          example: Smith
+                        about:
+                          type: string
+                          example: Experienced cardiologist
+                        email:
+                          type: string
+                          example: john@example.com
+                        hospital_id:
+                          type: integer
+                          example: 1
+                        specialization:
+                          type: string
+                          example: cardiologist
+
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Internal server error
+
+    post:
+      summary: Create a doctor
+      tags:
+        - Doctors
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - first_name
+                - last_name
+                - about
+                - email
+                - hospital_id
+              properties:
+                first_name:
+                  type: string
+                  example: John
+                last_name:
+                  type: string
+                  example: Smith
+                about:
+                  type: string
+                  example: Experienced cardiologist
+                email:
+                  type: string
+                  format: email
+                  example: john@example.com
+                hospital_id:
+                  type: integer
+                  example: 1
+                specialization:
+                  type: string
+                  default: general_practitioner
+                  example: cardiologist
+
+      responses:
+        "201":
+          description: Doctor created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Doctor created successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      first_name:
+                        type: string
+                        example: John
+                      last_name:
+                        type: string
+                        example: Smith
+                      about:
+                        type: string
+                        example: Experienced cardiologist
+                      email:
+                        type: string
+                        example: john@example.com
+                      hospital_id:
+                        type: integer
+                        example: 1
+                      specialization:
+                        type: string
+                        example: cardiologist
+
+        "400":
+          description: Required fields are missing
+
+        "500":
+          description: Internal server error
+
+  /doctors/{id}:
+    get:
+      summary: Get doctor by ID
+      tags:
+        - Doctors
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique doctor ID
+          schema:
+            type: integer
+          example: 1
+
+      responses:
+        "200":
+          description: Doctor fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Doctor fetched successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      first_name:
+                        type: string
+                        example: John
+                      last_name:
+                        type: string
+                        example: Smith
+                      about:
+                        type: string
+                        example: Experienced cardiologist
+                      email:
+                        type: string
+                        example: john@example.com
+                      hospital_id:
+                        type: integer
+                        example: 1
+                      specialization:
+                        type: string
+                        example: cardiologist
+
+        "404":
+          description: Doctor not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Doctor not found
+
+        "500":
+          description: Internal server error
+
+  # =================================================
+  # PRESCRIPTIONS
+  # =================================================
+
+
+  /prescriptions/{user_id}:
+    get:
+      summary: Get all prescriptions for a patient
+      description: Retrieves all prescriptions associated with a specific patient.
+      tags:
+        - Prescriptions
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the patient
+          schema:
+            type: integer
+          example: 503
+      responses:
+        "200":
+          description: Prescriptions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Prescriptions retrieved successfully
+                  count:
+                    type: integer
+                    example: 2
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        user_id:
+                          type: integer
+                          example: 503
+                        doctor_id:
+                          type: integer
+                          example: 1
+                        med_name:
+                          type: string
+                          example: Omeprazole
+                        med_type:
+                          type: string
+                          enum:
+                            - tablet
+                            - capsule
+                            - syrup
+                            - injection
+                            - ointment
+                            - inhaler
+                            - other
+                          example: capsule
+                        dosage:
+                          type: string
+                          example: 20mg
+                        morning:
+                          type: boolean
+                          example: true
+                        afternoon:
+                          type: boolean
+                          example: false
+                        evening:
+                          type: boolean
+                          example: false
+                        instructions:
+                          type: string
+                          nullable: true
+                          example: Take before breakfast
+                        start_date:
+                          type: string
+                          format: date
+                          example: "2026-11-05"
+                        end_date:
+                          type: string
+                          format: date
+                          nullable: true
+                          example: "2026-11-19"
+                        create_at:
+                          type: string
+                          format: date-time
+                          example: "2026-11-05T09:30:00.000Z"
+        "400":
+          description: Invalid user ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: A valid user ID is required
+        "500":
+          description: Internal server error
+
+    post:
+      summary: Create a prescription for a patient
+      description: Creates a new medication prescription associated with a patient and doctor.
+      tags:
+        - Prescriptions
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the patient receiving the prescription
+          schema:
+            type: integer
+          example: 503
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - doctor_id
+                - med_name
+                - med_type
+                - dosage
+                - morning
+                - afternoon
+                - evening
+                - start_date
+              properties:
+                doctor_id:
+                  type: integer
+                  example: 1
+                med_name:
+                  type: string
+                  example: Omeprazole
+                med_type:
+                  type: string
+                  enum:
+                    - tablet
+                    - capsule
+                    - syrup
+                    - injection
+                    - ointment
+                    - inhaler
+                    - other
+                  example: capsule
+                dosage:
+                  type: string
+                  example: 20mg
+                morning:
+                  type: boolean
+                  example: true
+                afternoon:
+                  type: boolean
+                  example: false
+                evening:
+                  type: boolean
+                  example: false
+                instructions:
+                  type: string
+                  nullable: true
+                  example: Take before breakfast
+                start_date:
+                  type: string
+                  format: date
+                  example: "2026-11-05"
+                end_date:
+                  type: string
+                  format: date
+                  nullable: true
+                  example: "2026-11-19"
+      responses:
+        "201":
+          description: Prescription created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Prescription created successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 10
+                      user_id:
+                        type: integer
+                        example: 503
+                      doctor_id:
+                        type: integer
+                        example: 1
+                      med_name:
+                        type: string
+                        example: Omeprazole
+                      med_type:
+                        type: string
+                        example: capsule
+                      dosage:
+                        type: string
+                        example: 20mg
+                      morning:
+                        type: boolean
+                        example: true
+                      afternoon:
+                        type: boolean
+                        example: false
+                      evening:
+                        type: boolean
+                        example: false
+                      instructions:
+                        type: string
+                        nullable: true
+                        example: Take before breakfast
+                      start_date:
+                        type: string
+                        format: date
+                        example: "2026-11-05"
+                      end_date:
+                        type: string
+                        format: date
+                        nullable: true
+                        example: "2026-11-19"
+                      create_at:
+                        type: string
+                        format: date-time
+                        example: "2026-11-05T09:30:00.000Z"
+        "400":
+          description: Missing or invalid prescription fields
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Please provide all required prescription fields
+        "404":
+          description: Patient or doctor not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Patient not found
+        "500":
+          description: Internal server error
+
+
+  # ==================================================
+  # SPECIALIZATIONS
+  # ==================================================
+
+  /specializations:
+    get:
+      tags:
+        - Specializations
+      summary: Get all available specializations
+      operationId: getSpecializations
+      responses:
+        '200':
+          description: Specializations retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          specializations:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Specialization'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /appointments/{user_id}:
+    get:
+      summary: Get user appointments
+      description: |
+        Fetch appointments belonging to a specific user.
+        Optionally filter appointments by status.
+        Results are grouped by appointment status.
+      tags:
+        - Appointments
+
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: Unique ID of the user
+          schema:
+            type: integer
+          example: 502
+
+        - name: status
+          in: query
+          required: false
+          description: Filter appointments by status
+          schema:
+            type: string
+            enum:
+              - scheduled
+              - completed
+              - cancelled
+          example: scheduled
+
+      responses:
+        "200":
+          description: Appointments fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: string
+                    example: "123"
+                  data:
+                    type: object
+                    additionalProperties:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          user_id:
+                            type: string
+                            example: "123"
+                          status:
+                            type: string
+                            example: scheduled
+                example:
+                  user_id: "123"
+                  data:
+                    scheduled:
+                      - id: 1
+                        user_id: "123"
+                        status: scheduled
+                      - id: 2
+                        user_id: "123"
+                        status: scheduled
+                    completed:
+                      - id: 3
+                        user_id: "123"
+                        status: completed
+
+        "400":
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+    post:
+      summary: Create a new appointment
+      description: Allows a patient to book an appointment with a doctor.
+      tags:
+        - Appointments
+
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: ID of the patient booking the appointment
+          schema:
+            type: integer
+            example: 1
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - doctor_id
+                - appointment_at
+              properties:
+                doctor_id:
+                  type: integer
+                  description: ID of the doctor
+                  example: 3
+                appointment_at:
+                  type: string
+                  format: date-time
+                  description: Requested appointment date and time. Must be in the future.
+                  example: "2026-11-15T10:30:00Z"
+
+      responses:
+        "201":
+          description: Appointment booked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Appointment booked successfully
+                  data:
+                    $ref: "#/components/schemas/Appointment"
+
+        "400":
+          description: Invalid user ID, doctor ID, or appointment date
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "404":
+          description: User or doctor not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /appointments/{id}:
+    patch:
+      summary: Cancel an appointment
+      description: Updates the appointment status to cancelled.
+      tags:
+        - Appointments
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique appointment ID
+          schema:
+            type: integer
+          example: 123
+
+      responses:
+        "200":
+          description: Appointment successfully cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Appointment successfully cancelled
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 123
+                      user_id:
+                        type: integer
+                        example: 10
+                      status:
+                        type: string
+                        example: cancelled
+
+        "404":
+          description: Appointment not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Appointment not found
+
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Internal server error
+
+  # ==================================================
+  # USERS
+  # ==================================================
+
+  /users/{user_id}:
+    get:
+      tags:
+        - Users
+      summary: Get user profile
+      operationId: getUserById
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - Users
+      summary: Update user profile
+      operationId: updateUser
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+            example:
+              name: "John Smith"
+              email: "john.smith@example.com"
+      responses:
+        '200':
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Email address is already in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/{user_id}/appointments:
+    get:
+      tags:
+        - Users
+        - Appointments
+      summary: Get user's appointment history
+      operationId: getUserAppointments
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/AppointmentStatus'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: User appointment history retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          appointments:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Appointment'
+                          pagination:
+                            $ref: '#/components/schemas/Pagination'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==================================================
+  # DISCOVERY
+  # ==================================================
+
+  /cities:
+    get:
+      tags:
+        - Discovery
+      summary: Get available hospital cities
+      operationId: getCities
+      responses:
+        '200':
+          description: Cities retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          cities:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/City'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /search:
+    get:
+      tags:
+        - Discovery
+      summary: Search doctors and hospitals
+      operationId: globalSearch
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+          description: Search term.
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [all, doctors, hospitals]
+            default: all
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          doctors:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Doctor'
+                          hospitals:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Hospital'
+                          pagination:
+                            $ref: '#/components/schemas/Pagination'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+# ==================================================
+# COMPONENTS
+# ==================================================
+
+components:
+
+  # ----------------------------
+  # Parameters
+  # ----------------------------
+
+  parameters:
+
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number.
+
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+      description: Number of records per page.
+
+    HospitalId:
+      name: hospital_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+
+    DoctorId:
+      name: doctor_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+
+    AppointmentId:
+      name: appointment_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+
+    UserId:
+      name: user_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+
+  # ----------------------------
+  # Schemas
+  # ----------------------------
+
+  schemas:
+
+    SuccessResponse:
+      type: object
+      required:
+        - success
+        - message
+        - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        message:
+          type: string
+        data:
+          type: object
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+          const: false
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+    Pagination:
+      type: object
+      required:
+        - page
+        - limit
+        - total
+        - total_pages
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UpdateUserRequest:
+      type: object
+      minProperties: 1
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+
+    Hospital:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        city:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+        popularity:
+          type: number
+        doctors_count:
+          type: integer
+
+    HospitalDetails:
+      allOf:
+        - $ref: '#/components/schemas/Hospital'
+        - type: object
+          properties:
+            specializations:
+              type: array
+              items:
+                type: string
+
+    NearbyHospital:
+      allOf:
+        - $ref: '#/components/schemas/Hospital'
+        - type: object
+          properties:
+            distance_km:
+              type: number
+              description: Distance from the supplied coordinates in kilometers.
+
+    Doctor:
+      type: object
+      properties:
+        id:
+          type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        specialization:
+          type: string
+        hospital:
+          $ref: '#/components/schemas/HospitalSummary'
+
+    DoctorDetails:
+      allOf:
+        - $ref: '#/components/schemas/Doctor'
+        - type: object
+          properties:
+            hospital:
+              $ref: '#/components/schemas/HospitalDetails'
+
+    HospitalSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        city:
+          type: string
+
+    NearbyDoctor:
+      allOf:
+        - $ref: '#/components/schemas/Doctor'
+        - type: object
+          properties:
+            distance_km:
+              type: number
+            hospital:
+              $ref: '#/components/schemas/HospitalSummary'
+
+    Specialization:
+      type: object
+      properties:
+        name:
+          type: string
+        doctors_count:
+          type: integer
+
+    City:
+      type: object
+      properties:
+        name:
+          type: string
+        hospitals_count:
+          type: integer
+
+    AvailabilityResponse:
+      type: object
+      properties:
+        doctor_id:
+          type: integer
+        timezone:
+          type: string
+          example: Europe/London
+        availability:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailableDate'
+
+    AvailableDate:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppointmentSlot'
+
+    AppointmentSlot:
+      type: object
+      properties:
+        start_at:
+          type: string
+          format: date-time
+        end_at:
+          type: string
+          format: date-time
+        available:
+          type: boolean
+
+    AppointmentStatus:
+      type: string
+      enum:
+        - pending
+        - confirmed
+        - rejected
+        - cancelled
+        - completed
+        - no_show
+
+    CreateAppointmentRequest:
+      type: object
+      required:
+        - user_id
+        - doctor_id
+        - appointment_at
+      properties:
+        user_id:
+          type: integer
+        doctor_id:
+          type: integer
+        appointment_at:
+          type: string
+          format: date-time
+        user_note:
+          type: [string, "null"]
+          maxLength: 2000
+
+    RescheduleAppointmentRequest:
+      type: object
+      required:
+        - appointment_at
+      properties:
+        appointment_at:
+          type: string
+          format: date-time
+
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        doctor_id:
+          type: integer
+        doctor:
+          $ref: '#/components/schemas/DoctorSummary'
+        hospital:
+          $ref: '#/components/schemas/HospitalSummary'
+        appointment_at:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/AppointmentStatus'
+        user_note:
+          type: [string, "null"]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AppointmentDetails:
+      allOf:
+        - $ref: '#/components/schemas/Appointment'
+        - type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            doctor:
+              $ref: '#/components/schemas/Doctor'
+            hospital:
+              $ref: '#/components/schemas/Hospital'
+
+    DoctorSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
+        specialization:
+          type: string
+
+  # ----------------------------
+  # Reusable responses
+  # ----------------------------
+
+  responses:
+
+    BadRequest:
+      description: Invalid request or validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            message: Validation failed
+            errors:
+              appointment_at:
+                - Appointment date must be in the future.
+
+    NotFound:
+      description: Requested resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            message: Resource not found
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            message: Internal server error

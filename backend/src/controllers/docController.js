@@ -1,35 +1,114 @@
+
 import db from "../db/knex.js";
 
-export const getAllDocs = async (req, res) => {
+// GET all doctors
+export const getDoctors = async (req, res) => {
     try {
-        const docs = await db("users").select("*").limit(10).offset(0);
-        res.json({
-            status_code: 200,
-            message: "Docs fetched successfully",
-            data: docs,
+        const doctors = await db("doctors")
+            .select("*")
+            .orderBy("id", "desc");
+
+        return res.status(200).json({
+            success: true,
+            message: "Doctors fetched successfully",
+            data: doctors
         });
+
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
     }
 };
 
+
+// CREATE doctor
+export const createDoctor = async (req, res) => {
+    try {
+        const {
+            first_name,
+            last_name,
+            about,
+            email,
+            hospital_id,
+            specialization
+        } = req.body;
+
+        // Validate required fields
+        if (
+            !first_name ||
+            !last_name ||
+            !about ||
+            !email ||
+            !hospital_id
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "All required fields must be provided"
+            });
+        }
+
+        const [doctor] = await db("doctors")
+            .insert({
+                first_name,
+                last_name,
+                about,
+                email,
+                hospital_id,
+                specialization
+            })
+            .returning("*");
+
+        return res.status(201).json({
+            success: true,
+            message: "Doctor created successfully",
+            data: doctor
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+};
+
+
+// GET doctor by ID
 export const getDocById = async (req, res) => {
     try {
         const { id } = req.params;
-        const doc = await db("users").select("*").where("id", id).first();
-        res.json({
-            status_code: 200,
-            message: "Doc fetched successfully",
-            data: doc,
+
+        const doctor = await db("doctors")
+            .where("id", id)
+            .first();
+
+        if (!doctor) {
+            return res.status(404).json({
+                success: false,
+                message: "Doctor not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Doctor fetched successfully",
+            data: doctor
         });
+
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
     }
 };
 
 const docController = {
-    getAllDocs,
+    getDoctors,
+    createDoctor,
     getDocById,
-};
+}
 
 export default docController;
