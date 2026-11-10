@@ -2,14 +2,15 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> } 
  */
-const { faker } = require("@faker-js/faker");
-const bcrypt = require("bcryptjs");
+import { faker } from "@faker-js/faker";
+import bcrypt from "bcryptjs";
 
-exports.seed = async function (knex) {
+export const seed = async function (knex) {
   await knex("users").del();
   faker.seed(12345);
 
-  const passwordHash = await bcrypt.hash("DevOnly123!", 10);
+  const salt = await bcrypt.genSalt(10);
+  const passwordHash = await bcrypt.hash("DevOnly123!", salt);
 
   const totalUsers = 100;
   const batchSize = 100;
@@ -22,6 +23,8 @@ exports.seed = async function (knex) {
     updated_at: faker.date.recent(),
   }));
 
+
+  //just batch insert the users to the database
   for (let i = 0; i < users.length; i += batchSize) {
     await knex("users")
       .insert(users.slice(i, i + batchSize))

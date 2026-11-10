@@ -7,11 +7,11 @@ export default {
     connection: process.env.DATABASE_URL,
 
     migrations: {
-      directory: "./db/migrations",
+      directory: "./src/db/migrations",
       tableName: "knex_migrations",
     },
     seeds: {
-      directory: "./db/seeds",
+      directory: "./src/db/seeds",
     },
   },
 };
