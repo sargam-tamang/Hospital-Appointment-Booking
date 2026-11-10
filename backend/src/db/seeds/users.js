@@ -6,7 +6,7 @@ import { faker } from "@faker-js/faker";
 import bcrypt from "bcryptjs";
 
 export const seed = async function (knex) {
-  await knex("users").del();
+  // await knex("users").del();
   faker.seed(12345);
 
   const salt = await bcrypt.genSalt(10);

@@ -16,5 +16,35 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d myapp"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  app:
+    build: .
+    container_name: my-node-app
+    restart: unless-stopped
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://appuser:devpassword@db:5432/myapp
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    command: >
+      sh -c "
+        npx knex migrate:latest &&
+        npx knex seed:run &&
+        npm start
+      "
+
 volumes:
   postgres_data:
