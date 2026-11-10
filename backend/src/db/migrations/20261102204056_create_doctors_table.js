@@ -14,7 +14,6 @@ export const up = async function(knex) {
     table.increments("id").primary();
     table.string("first_name").notNullable();
     table.string("last_name").notNullable();
-    table.string("about").notNullable();
     table.string("email").notNullable();
     table.integer("hospital_id").notNullable();
     table.enu("specialization", SPECIALIZATION).notNullable().defaultTo("general_practitioner");

@@ -7,8 +7,9 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "dev2": "nodemon src/server.js",
-    "build": "npm install"
+    "build": "npm install",
+    "migrate": "knex migrate:latest",
+    "seed": "knex seed:run"
   },
   "dependencies": {
     "swagger-ui-express": "^5.0.1",

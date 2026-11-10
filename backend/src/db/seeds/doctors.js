@@ -4,7 +4,7 @@
  */
 export const seed = async function(knex) {
   // Remove existing doctors to avoid duplicate records
-  await knex("doctors").del();
+  // await knex("doctors").del();
 
   const doctors = [
     {
