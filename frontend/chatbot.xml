@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F6F7FB">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="qikify Support - Hospital Booking"
+        android:textColor="white"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:background="#3B82F6"
+        android:gravity="center_vertical"
+        android:paddingLeft="16dp"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:text="Vue Bot UI"
+                android:textColor="white"
+                android:background="#3B82F6"
+                android:padding="12dp"
+                android:layout_marginBottom="12dp"/>
+
+            <TextView
+                android:layout_width="280dp"
+                android:layout_height="wrap_content"
+                android:text="How can we help you today?"
+                android:background="#FFFFFF"
+                android:padding="14dp"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:text="Search Support Articles"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp"
+                android:textAllCaps="false"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:text="Submit Support Ticket"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:textAllCaps="false"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:text="Thank you"
+                android:textColor="white"
+                android:background="#3B82F6"
+                android:padding="12dp"
+                android:layout_marginTop="16dp"/>
+
+            <TextView
+                android:layout_width="280dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Sorry to hear that. Please type your problem and we will create a ticket for you."
+                android:background="#FFFFFF"
+                android:padding="14dp"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="#FFFFFF"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:gravity="center_vertical">
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_weight="1"
+            android:hint="Type hereeee..."
+            android:background="#F3F4F6"
+            android:padding="12dp"/>
+
+        <TextView
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginLeft="8dp"
+            android:text="➤"
+            android:background="#3B82F6"
+            android:textColor="white"
+            android:gravity="center"
+            android:textSize="18sp"/>
+    </LinearLayout>
+</LinearLayout>
